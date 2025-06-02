@@ -8,28 +8,31 @@ suits = {'♥️': 'h', '♦️': 'd', '♣️': 'c', '♠️': 's'}
 ranks = ['2', '3', '4', '5', '6', '7', '8', '9', 'T', 'J', 'Q', 'K', 'A']
 
 st.title("♠️ Poker EV & Odds Dashboard")
-st.write("Select your cards and chips to calculate win odds and expected value.")
+st.write("Click your cards and chips to calculate win odds and expected value.")
 
-# --- Card Pickers ---
-def card_picker(label):
-    col1, col2 = st.columns(2)
-    with col1:
-        suit = st.selectbox(f"{label} Suit", list(suits.keys()), key=f"suit_{label}")
-    with col2:
-        rank = st.selectbox(f"{label} Rank", ranks, key=f"rank_{label}")
-    return rank + suits[suit]
+# --- Interactive Card Pickers ---
+def card_grid(label):
+    st.markdown(f"**{label}**")
+    suit_choice = st.radio(f"Choose Suit for {label}", list(suits.keys()), horizontal=True, key=f"suit_{label}")
+    cols = st.columns(13)
+    card = None
+    for i, rank in enumerate(ranks):
+        if cols[i].button(rank, key=f"{label}_{rank}"):
+            card = rank + suits[suit_choice]
+            st.session_state[label] = card
+    return st.session_state.get(label, ranks[0] + suits[suit_choice])
 
-hole1 = card_picker("Hole 1")
-hole2 = card_picker("Hole 2")
+hole1 = card_grid("Hole 1")
+hole2 = card_grid("Hole 2")
 
 st.markdown("---")
 st.subheader("Community Cards")
 
-flop1 = card_picker("Flop 1")
-flop2 = card_picker("Flop 2")
-flop3 = card_picker("Flop 3")
-turn = card_picker("Turn")
-river = card_picker("River")
+flop1 = card_grid("Flop 1")
+flop2 = card_grid("Flop 2")
+flop3 = card_grid("Flop 3")
+turn = card_grid("Turn")
+river = card_grid("River")
 
 # --- Chip Selectors with Session State ---
 st.markdown("---")
