@@ -44,6 +44,11 @@ if "pot" not in st.session_state:
 if "call" not in st.session_state:
     st.session_state.call = 20.0
 
+# Clear All button
+if st.button("🧼 Clear All (Pot & Call)", key="clear_all"):
+    st.session_state.pot = 0.0
+    st.session_state.call = 0.0
+
 chip_values = [0.25, 0.5, 1, 5]
 chip_emojis = {0.25: "🟤", 0.5: "🔵", 1: "🟢", 5: "🔴"}
 
@@ -54,8 +59,6 @@ with pot_col:
     for val in chip_values:
         if st.button(f"{chip_emojis[val]} Add ${val} to Pot", key=f"pot_{val}"):
             st.session_state.pot += val
-    if st.button("🧼 Clear Pot", key="clear_pot"):
-        st.session_state.pot = 0.0
     st.session_state.pot = st.number_input("Pot Total ($):", value=st.session_state.pot, step=0.25)
 
 with call_col:
