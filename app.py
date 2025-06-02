@@ -54,6 +54,8 @@ with pot_col:
     for val in chip_values:
         if st.button(f"{chip_emojis[val]} Add ${val} to Pot", key=f"pot_{val}"):
             st.session_state.pot += val
+    if st.button("🧼 Clear Pot", key="clear_pot"):
+        st.session_state.pot = 0.0
     st.session_state.pot = st.number_input("Pot Total ($):", value=st.session_state.pot, step=0.25)
 
 with call_col:
