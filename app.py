@@ -31,30 +31,34 @@ flop3 = card_picker("Flop 3")
 turn = card_picker("Turn")
 river = card_picker("River")
 
-# --- Chip Selectors ---
+# --- Chip Selectors with Session State ---
 st.markdown("---")
-st.subheader("🎙️ Pot & Call Chips")
+st.subheader("\U0001FA99 Pot & Call Chips")
 
-pot = 0.0
-call = 0.0
+# Initialize session state
+if "pot" not in st.session_state:
+    st.session_state.pot = 100.0
+if "call" not in st.session_state:
+    st.session_state.call = 20.0
 
 chip_values = [0.25, 0.5, 1, 5]
+chip_emojis = {0.25: "🟤", 0.5: "🔵", 1: "🟢", 5: "🔴"}
 
 pot_col, call_col = st.columns(2)
 
 with pot_col:
     st.write("Pot Chips")
     for val in chip_values:
-        if st.button(f"Add ${val} to Pot", key=f"pot_{val}"):
-            pot += val
-    pot = st.number_input("Pot Total ($):", value=100.0, step=0.25)
+        if st.button(f"{chip_emojis[val]} Add ${val} to Pot", key=f"pot_{val}"):
+            st.session_state.pot += val
+    st.session_state.pot = st.number_input("Pot Total ($):", value=st.session_state.pot, step=0.25)
 
 with call_col:
     st.write("Call Chips")
     for val in chip_values:
-        if st.button(f"Add ${val} to Call", key=f"call_{val}"):
-            call += val
-    call = st.number_input("Call Amount ($):", value=20.0, step=0.25)
+        if st.button(f"{chip_emojis[val]} Add ${val} to Call", key=f"call_{val}"):
+            st.session_state.call += val
+    st.session_state.call = st.number_input("Call Amount ($):", value=st.session_state.call, step=0.25)
 
 # --- Calculations ---
 def parse_cards(card_strs):
@@ -108,7 +112,7 @@ if st.button("Calculate EV & Odds"):
     board = [flop1, flop2, flop3, turn, river]
     win, tie = calculate_win_and_tie_odds(hole, board)
     if win is not None:
-        ev = calculate_ev(pot, call, win, tie)
+        ev = calculate_ev(st.session_state.pot, st.session_state.call, win, tie)
         st.success(f"🧠 Win Odds: {win}%")
         st.info(f"🤝 Tie Odds: {tie}%")
         st.warning(f"{'✅ Positive' if ev >= 0 else '❌ Negative'} EV: ${ev}")
