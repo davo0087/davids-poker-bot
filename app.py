@@ -4,8 +4,6 @@ import streamlit as st
 from treys import Card, Deck, Evaluator
 import random
 
-st.write("Loaded!")
-
 suits = {'♥️': 'h', '♦️': 'd', '♣️': 'c', '♠️': 's'}
 ranks = ['2', '3', '4', '5', '6', '7', '8', '9', 'T', 'J', 'Q', 'K', 'A']
 
@@ -101,7 +99,15 @@ if st.button("Analyze Hand"):
         category = hand_category(hole, board)
         st.success(f"🏆 Hand Category: {category}")
         st.info(f"🔢 Outs Count: {get_outs(hole, board)}")
-        st.warning(f"🔥 Aggression Index: {round(2.0 * (['High Card', 'One Pair', 'Two Pair', 'Three of a Kind', 'Straight', 'Flush', 'Full House', 'Four of a Kind', 'Straight Flush', 'Royal Flush'].index(category) + 1), 2)}")
+        try:
+        rank_list = ['High Card', 'One Pair', 'Two Pair', 'Three of a Kind', 'Straight', 'Flush', 'Full House', 'Four of a Kind', 'Straight Flush', 'Royal Flush']
+        if category in rank_list:
+            index = rank_list.index(category)
+            st.warning(f"🔥 Aggression Index: {round(2.0 * (index + 1), 2)}")
+        else:
+            st.warning("🔥 Aggression Index: Unknown")
+    except Exception as e:
+        st.warning(f"🔥 Aggression Index: Error calculating index") + 1), 2)}")
         best_turns = simulate_turn_impact(hole, board)
         st.write("🃏 Top Potential Turn Cards:")
         for val, score in best_turns:
