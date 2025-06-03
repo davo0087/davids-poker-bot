@@ -8,7 +8,7 @@ suits = {'♥️': 'h', '♦️': 'd', '♣️': 'c', '♠️': 's'}
 ranks = ['2', '3', '4', '5', '6', '7', '8', '9', 'T', 'J', 'Q', 'K', 'A']
 
 st.title("♠️ Poker Decision Dashboard")
-st.image("https://upload.wikimedia.org/wikipedia/commons/thumb/f/f1/Poker-sm-2427.jpg/800px-Poker-sm-2427.jpg", use_column_width=True)
+st.image("https://upload.wikimedia.org/wikipedia/commons/thumb/f/f1/Poker-sm-2427.jpg/800px-Poker-sm-2427.jpg", use_container_width=True)
 
 if st.button("🔄 Reset All Cards"):
     st.session_state.my_cards = []
