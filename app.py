@@ -18,11 +18,16 @@ for label in ["Hole 1", "Hole 2", "Flop 1", "Flop 2", "Flop 3", "Turn", "River"]
 # --- Interactive Card Pickers ---
 def card_grid(label):
     st.markdown(f"**{label}**")
-    suit_choice = st.radio(f"Choose Suit for {label}", list(suits.keys()), horizontal=True, key=f"suit_{label}")
-    cols = st.columns(13)
-    for i, rank in enumerate(ranks):
-        if cols[i].button(rank, key=f"{label}_{rank}"):
-            st.session_state[label] = rank + suits[suit_choice]
+    cols = st.columns([1, 8, 2])
+    with cols[0]:
+        if st.button(f"❌ Clear {label}", key=f"clear_{label}"):
+            st.session_state[label] = None
+    with cols[1]:
+        suit_choice = st.radio(f"Choose Suit for {label}", list(suits.keys()), horizontal=True, key=f"suit_{label}")
+        rank_cols = st.columns(13)
+        for i, rank in enumerate(ranks):
+            if rank_cols[i].button(rank, key=f"{label}_{rank}"):
+                st.session_state[label] = rank + suits[suit_choice]
     return st.session_state[label]
 
 hole1 = card_grid("Hole 1")
