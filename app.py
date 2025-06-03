@@ -1,4 +1,4 @@
-# --- Streamlit Poker EV Dashboard ---
+# --- Streamlit Poker Decision Dashboard ---
 
 import streamlit as st
 from treys import Card, Deck, Evaluator
@@ -7,8 +7,8 @@ import random
 suits = {'♥️': 'h', '♦️': 'd', '♣️': 'c', '♠️': 's'}
 ranks = ['2', '3', '4', '5', '6', '7', '8', '9', 'T', 'J', 'Q', 'K', 'A']
 
-st.title("♠️ Poker EV & Odds Dashboard")
-st.write("Click your cards and chips to calculate win odds and expected value.")
+st.title("♠️ Poker Decision Dashboard")
+st.write("Click your cards and chips to analyze hand strength and potential.")
 
 # --- Initialize session state for cards ---
 for label in ["Hole 1", "Hole 2", "Flop 1", "Flop 2", "Flop 3", "Turn", "River"]:
@@ -41,13 +41,11 @@ river = card_grid("River")
 st.markdown("---")
 st.subheader("\U0001FA99 Pot & Call Chips")
 
-# Initialize session state for chips
 if "pot" not in st.session_state:
     st.session_state.pot = 100.0
 if "call" not in st.session_state:
     st.session_state.call = 20.0
 
-# Clear All button
 if st.button("🧼 Clear All (Pot & Call)", key="clear_all"):
     st.session_state.pot = 0.0
     st.session_state.call = 0.0
@@ -77,61 +75,73 @@ st.subheader("🃏 Your Current Hand")
 st.write(f"Hole Cards: {st.session_state['Hole 1']} {st.session_state['Hole 2']}")
 st.write(f"Board: {st.session_state['Flop 1']} {st.session_state['Flop 2']} {st.session_state['Flop 3']} {st.session_state['Turn']} {st.session_state['River']}")
 
-# --- Calculations ---
+# --- Utilities ---
 def parse_cards(card_strs):
     return [Card.new(c) for c in card_strs if c]
 
-def calculate_win_and_tie_odds(hole_strs, board_strs, num_players=2, simulations=1000):
+def get_outs(hole, board):
+    known = hole + board
+    deck = Deck()
+    for c in known:
+        if c in deck.cards:
+            deck.cards.remove(c)
+
     evaluator = Evaluator()
-    wins, ties = 0, 0
+    current_rank = evaluator.evaluate(board, hole)
+    outs = 0
+    for card in deck.cards:
+        trial_board = board + [card] if len(board) < 5 else board
+        rank = evaluator.evaluate(trial_board[:5], hole)
+        if rank < current_rank:
+            outs += 1
+    return outs
 
-    if len(hole_strs) != 2 or len(board_strs) > 5:
-        return None, None
+def hand_category(hole, board):
+    evaluator = Evaluator()
+    try:
+        score = evaluator.evaluate(board, hole)
+        return evaluator.class_to_string(evaluator.get_rank_class(score))
+    except:
+        return "Incomplete Hand"
 
-    hole = parse_cards(hole_strs)
-    board = parse_cards(board_strs)
+def aggression_index(pot, call_amt, hand_strength):
+    level = {"High Card": 0.5, "One Pair": 1, "Two Pair": 1.5, "Three of a Kind": 2, "Straight": 2.5,
+             "Flush": 3, "Full House": 3.5, "Four of a Kind": 4, "Straight Flush": 4.5, "Royal Flush": 5}
+    base = level.get(hand_strength, 1)
+    ratio = pot / call_amt if call_amt else 1
+    return round(base * ratio, 2)
 
-    for _ in range(simulations):
-        deck = Deck()
-        for c in hole + board:
-            if c in deck.cards:
-                deck.cards.remove(c)
+def simulate_turn_impact(hole, board):
+    evaluator = Evaluator()
+    deck = Deck()
+    known = hole + board
+    for c in known:
+        if c in deck.cards:
+            deck.cards.remove(c)
 
-        full_board = board[:]
-        while len(full_board) < 5:
-            full_board.append(deck.draw(1)[0])
-
-        opp_scores = []
-        for _ in range(num_players - 1):
-            opp = [deck.draw(1)[0], deck.draw(1)[0]]
-            opp_scores.append(evaluator.evaluate(full_board, opp))
-
-        player_score = evaluator.evaluate(full_board, hole)
-
-        if all(player_score < s for s in opp_scores):
-            wins += 1
-        elif any(player_score == s for s in opp_scores):
-            ties += 1
-
-    return round((wins / simulations) * 100, 2), round((ties / simulations) * 100, 2)
-
-def calculate_ev(pot, call_amt, win_pct, tie_pct):
-    win_chance = win_pct / 100
-    tie_chance = tie_pct / 100
-    lose_chance = 1 - win_chance - tie_chance
-    ev = (win_chance * pot) + (tie_chance * pot / 2) - (lose_chance * call_amt)
-    return round(ev, 2)
+    results = []
+    for card in deck.cards:
+        trial_board = board + [card]
+        if len(trial_board) > 5:
+            trial_board = trial_board[:5]
+        score = evaluator.evaluate(trial_board, hole)
+        results.append((Card.int_to_pretty_str(card), score))
+    results.sort(key=lambda x: x[1])
+    return results[:5]  # top 5 best turn cards
 
 # --- Run Button ---
 st.markdown("---")
-if st.button("Calculate EV & Odds"):
-    hole = [st.session_state['Hole 1'], st.session_state['Hole 2']]
-    board = [st.session_state['Flop 1'], st.session_state['Flop 2'], st.session_state['Flop 3'], st.session_state['Turn'], st.session_state['River']]
-    win, tie = calculate_win_and_tie_odds(hole, board)
-    if win is not None:
-        ev = calculate_ev(st.session_state.pot, st.session_state.call, win, tie)
-        st.success(f"🧠 Win Odds: {win}%")
-        st.info(f"🤝 Tie Odds: {tie}%")
-        st.warning(f"{'✅ Positive' if ev >= 0 else '❌ Negative'} EV: ${ev}")
+if st.button("Analyze Hand"):
+    hole = parse_cards([st.session_state['Hole 1'], st.session_state['Hole 2']])
+    board = parse_cards([st.session_state['Flop 1'], st.session_state['Flop 2'], st.session_state['Flop 3'],
+                         st.session_state['Turn'], st.session_state['River']])
+    if len(hole) == 2:
+        st.success(f"🏆 Hand Category: {hand_category(hole, board)}")
+        st.info(f"🔢 Outs Count: {get_outs(hole, board)}")
+        st.warning(f"🔥 Aggression Index: {aggression_index(st.session_state.pot, st.session_state.call, hand_category(hole, board))}")
+        best_turns = simulate_turn_impact(hole, board)
+        st.write("🃏 Top Potential Turn Cards:")
+        for val, score in best_turns:
+            st.write(f"{val} → Rank Score: {score}")
     else:
-        st.error("Invalid card input. Please check selections.")
+        st.error("Select two hole cards to begin analysis.")
