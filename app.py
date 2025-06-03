@@ -99,15 +99,17 @@ if st.button("Analyze Hand"):
         category = hand_category(hole, board)
         st.success(f"🏆 Hand Category: {category}")
         st.info(f"🔢 Outs Count: {get_outs(hole, board)}")
+
         try:
-        rank_list = ['High Card', 'One Pair', 'Two Pair', 'Three of a Kind', 'Straight', 'Flush', 'Full House', 'Four of a Kind', 'Straight Flush', 'Royal Flush']
-        if category in rank_list:
-            index = rank_list.index(category)
-            st.warning(f"🔥 Aggression Index: {round(2.0 * (index + 1), 2)}")
-        else:
-            st.warning("🔥 Aggression Index: Unknown")
-    except Exception as e:
-        st.warning(f"🔥 Aggression Index: Error calculating index") + 1), 2)}")
+            rank_list = ['High Card', 'One Pair', 'Two Pair', 'Three of a Kind', 'Straight', 'Flush', 'Full House', 'Four of a Kind', 'Straight Flush', 'Royal Flush']
+            if category in rank_list:
+                index = rank_list.index(category)
+                st.warning(f"🔥 Aggression Index: {round(2.0 * (index + 1), 2)}")
+            else:
+                st.warning("🔥 Aggression Index: Unknown")
+        except Exception as e:
+            st.warning("🔥 Aggression Index: Error calculating index")
+
         best_turns = simulate_turn_impact(hole, board)
         st.write("🃏 Top Potential Turn Cards:")
         for val, score in best_turns:
