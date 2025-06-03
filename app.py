@@ -77,7 +77,7 @@ def hand_category(hole, board):
     except:
         return "Incomplete Hand"
 
-def simulate_turn_impact(hole, board):
+def simulate_stronger_hands(hole, board):
     evaluator = Evaluator()
     deck = Deck()
     known = hole + board
@@ -85,15 +85,19 @@ def simulate_turn_impact(hole, board):
         if c in deck.cards:
             deck.cards.remove(c)
 
-    results = []
-    for card in deck.cards:
-        trial_board = board + [card]
-        if len(trial_board) > 5:
-            trial_board = trial_board[:5]
-        score = evaluator.evaluate(trial_board, hole)
-        results.append((Card.int_to_pretty_str(card), score))
-    results.sort(key=lambda x: x[1])
-    return results[:5]  # top 5 best turn cards
+    stronger_hands = []
+    current_score = evaluator.evaluate(board, hole)
+    for i in range(500):
+        random.shuffle(deck.cards)
+        opp_hole = deck.cards[:2]
+        opp_score = evaluator.evaluate(board, opp_hole)
+        if opp_score < current_score:
+            desc = evaluator.class_to_string(evaluator.get_rank_class(opp_score))
+            pretty = [Card.int_to_pretty_str(c) for c in opp_hole]
+            stronger_hands.append((desc, pretty))
+        if len(stronger_hands) >= 5:
+            break
+    return stronger_hands
 
 # --- Analyze Button ---
 st.markdown("---")
@@ -115,9 +119,9 @@ if st.button("Analyze Hand"):
         except Exception as e:
             st.warning("🔥 Aggression Index: Error calculating index")
 
-        best_turns = simulate_turn_impact(hole, board)
-        st.write("🃏 Top Potential Turn Cards:")
-        for val, score in best_turns:
-            st.write(f"{val} → Rank Score: {score}")
+        likely_beaters = simulate_stronger_hands(hole, board)
+        st.write("💀 Likely Hands That Beat You:")
+        for hand_type, cards in likely_beaters:
+            st.write(f"{hand_type}: {' '.join(cards)}")
     else:
         st.error("Select exactly 2 cards for 'My Cards'.")
