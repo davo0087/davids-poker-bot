@@ -8,7 +8,7 @@ suits = {'♥️': 'h', '♦️': 'd', '♣️': 'c', '♠️': 's'}
 ranks = ['2', '3', '4', '5', '6', '7', '8', '9', 'T', 'J', 'Q', 'K', 'A']
 
 st.title("♠️ Poker Decision Dashboard")
-st.write("Click your cards and chips to analyze hand strength and potential.")
+st.write("Click your cards to analyze hand strength and potential.")
 
 # --- Initialize session state for cards ---
 for label in ["Hole 1", "Hole 2", "Flop 1", "Flop 2", "Flop 3", "Turn", "River"]:
@@ -36,38 +36,6 @@ flop2 = card_grid("Flop 2")
 flop3 = card_grid("Flop 3")
 turn = card_grid("Turn")
 river = card_grid("River")
-
-# --- Chip Selectors with Session State ---
-st.markdown("---")
-st.subheader("\U0001FA99 Pot & Call Chips")
-
-if "pot" not in st.session_state:
-    st.session_state.pot = 100.0
-if "call" not in st.session_state:
-    st.session_state.call = 20.0
-
-if st.button("🧼 Clear All (Pot & Call)", key="clear_all"):
-    st.session_state.pot = 0.0
-    st.session_state.call = 0.0
-
-chip_values = [0.25, 0.5, 1, 5]
-chip_emojis = {0.25: "🟤", 0.5: "🔵", 1: "🟢", 5: "🔴"}
-
-pot_col, call_col = st.columns(2)
-
-with pot_col:
-    st.write("Pot Chips")
-    for val in chip_values:
-        if st.button(f"{chip_emojis[val]} Add ${val} to Pot", key=f"pot_{val}"):
-            st.session_state.pot += val
-    st.session_state.pot = st.number_input("Pot Total ($):", value=st.session_state.pot, step=0.25)
-
-with call_col:
-    st.write("Call Chips")
-    for val in chip_values:
-        if st.button(f"{chip_emojis[val]} Add ${val} to Call", key=f"call_{val}"):
-            st.session_state.call += val
-    st.session_state.call = st.number_input("Call Amount ($):", value=st.session_state.call, step=0.25)
 
 # --- Display Selected Cards ---
 st.markdown("---")
@@ -104,13 +72,6 @@ def hand_category(hole, board):
     except:
         return "Incomplete Hand"
 
-def aggression_index(pot, call_amt, hand_strength):
-    level = {"High Card": 0.5, "One Pair": 1, "Two Pair": 1.5, "Three of a Kind": 2, "Straight": 2.5,
-             "Flush": 3, "Full House": 3.5, "Four of a Kind": 4, "Straight Flush": 4.5, "Royal Flush": 5}
-    base = level.get(hand_strength, 1)
-    ratio = pot / call_amt if call_amt else 1
-    return round(base * ratio, 2)
-
 def simulate_turn_impact(hole, board):
     evaluator = Evaluator()
     deck = Deck()
@@ -136,9 +97,10 @@ if st.button("Analyze Hand"):
     board = parse_cards([st.session_state['Flop 1'], st.session_state['Flop 2'], st.session_state['Flop 3'],
                          st.session_state['Turn'], st.session_state['River']])
     if len(hole) == 2:
-        st.success(f"🏆 Hand Category: {hand_category(hole, board)}")
+        category = hand_category(hole, board)
+        st.success(f"🏆 Hand Category: {category}")
         st.info(f"🔢 Outs Count: {get_outs(hole, board)}")
-        st.warning(f"🔥 Aggression Index: {aggression_index(st.session_state.pot, st.session_state.call, hand_category(hole, board))}")
+        st.warning(f"🔥 Aggression Index: {round(2.0 * (['High Card', 'One Pair', 'Two Pair', 'Three of a Kind', 'Straight', 'Flush', 'Full House', 'Four of a Kind', 'Straight Flush', 'Royal Flush'].index(category) + 1), 2)}")
         best_turns = simulate_turn_impact(hole, board)
         st.write("🃏 Top Potential Turn Cards:")
         for val, score in best_turns:
