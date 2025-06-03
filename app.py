@@ -8,45 +8,40 @@ suits = {'♥️': 'h', '♦️': 'd', '♣️': 'c', '♠️': 's'}
 ranks = ['2', '3', '4', '5', '6', '7', '8', '9', 'T', 'J', 'Q', 'K', 'A']
 
 st.title("♠️ Poker Decision Dashboard")
-st.write("Click your cards to analyze hand strength and potential.")
+st.write("Select your cards by clicking them in the 52-card grid. Choose a holder above first.")
 
-# --- Initialize session state for cards ---
-for label in ["Hole 1", "Hole 2", "Flop 1", "Flop 2", "Flop 3", "Turn", "River"]:
-    if label not in st.session_state:
-        st.session_state[label] = None
+# --- Define Card Holders ---
+holders = ["My Cards", "Table Cards"]
+if "selected_holder" not in st.session_state:
+    st.session_state.selected_holder = holders[0]
 
-# --- Interactive Card Pickers ---
-def card_grid(label):
-    st.markdown(f"**{label}** 🔘")
-    cols = st.columns([1, 8, 2])
-    with cols[0]:
-        if st.button("❌", key=f"clear_{label}"):
-            st.session_state[label] = None
-    with cols[1]:
-        suit_choice = st.radio(f"Choose Suit for {label}", list(suits.keys()), horizontal=True, key=f"suit_{label}")
-        rank_cols = st.columns(13)
-        for i, rank in enumerate(ranks):
-            if rank_cols[i].button(rank, key=f"{label}_{rank}"):
-                st.session_state[label] = rank + suits[suit_choice]
-    return st.session_state[label]
+holder_selection = st.radio("Select a card holder:", holders, horizontal=True)
+st.session_state.selected_holder = holder_selection
 
-hole1 = card_grid("Hole 1")
-hole2 = card_grid("Hole 2")
+# --- Track assigned cards ---
+if "my_cards" not in st.session_state:
+    st.session_state.my_cards = []
+if "table_cards" not in st.session_state:
+    st.session_state.table_cards = []
 
+# --- Card Deck UI ---
+st.subheader("🃏 Full 52 Card Deck")
+deck_cols = st.columns(13)
+for i, rank in enumerate(ranks):
+    for suit_icon, suit_char in suits.items():
+        label = rank + suit_char
+        pretty = rank + suit_icon
+        if deck_cols[i].button(pretty, key=label):
+            if st.session_state.selected_holder == "My Cards" and label not in st.session_state.my_cards and len(st.session_state.my_cards) < 2:
+                st.session_state.my_cards.append(label)
+            elif st.session_state.selected_holder == "Table Cards" and label not in st.session_state.table_cards and len(st.session_state.table_cards) < 5:
+                st.session_state.table_cards.append(label)
+
+# --- Show selected cards ---
 st.markdown("---")
-st.subheader("Community Cards")
-
-flop1 = card_grid("Flop 1")
-flop2 = card_grid("Flop 2")
-flop3 = card_grid("Flop 3")
-turn = card_grid("Turn")
-river = card_grid("River")
-
-# --- Display Selected Cards ---
-st.markdown("---")
-st.subheader("🃏 Your Current Hand")
-st.write(f"Hole Cards: {st.session_state['Hole 1']} {st.session_state['Hole 2']}")
-st.write(f"Board: {st.session_state['Flop 1']} {st.session_state['Flop 2']} {st.session_state['Flop 3']} {st.session_state['Turn']} {st.session_state['River']}")
+st.subheader("🗃️ Selected Cards")
+st.write(f"My Cards: {st.session_state.my_cards}")
+st.write(f"Table Cards: {st.session_state.table_cards}")
 
 # --- Utilities ---
 def parse_cards(card_strs):
@@ -95,12 +90,11 @@ def simulate_turn_impact(hole, board):
     results.sort(key=lambda x: x[1])
     return results[:5]  # top 5 best turn cards
 
-# --- Run Button ---
+# --- Analyze Button ---
 st.markdown("---")
 if st.button("Analyze Hand"):
-    hole = parse_cards([st.session_state['Hole 1'], st.session_state['Hole 2']])
-    board = parse_cards([st.session_state['Flop 1'], st.session_state['Flop 2'], st.session_state['Flop 3'],
-                         st.session_state['Turn'], st.session_state['River']])
+    hole = parse_cards(st.session_state.my_cards)
+    board = parse_cards(st.session_state.table_cards)
     if len(hole) == 2:
         category = hand_category(hole, board)
         st.success(f"🏆 Hand Category: {category}")
@@ -111,4 +105,4 @@ if st.button("Analyze Hand"):
         for val, score in best_turns:
             st.write(f"{val} → Rank Score: {score}")
     else:
-        st.error("Select two hole cards to begin analysis.")
+        st.error("Select exactly 2 cards for 'My Cards'.")
