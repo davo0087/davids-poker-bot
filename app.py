@@ -17,10 +17,10 @@ for label in ["Hole 1", "Hole 2", "Flop 1", "Flop 2", "Flop 3", "Turn", "River"]
 
 # --- Interactive Card Pickers ---
 def card_grid(label):
-    st.markdown(f"**{label}**")
+    st.markdown(f"**{label}** 🔘")
     cols = st.columns([1, 8, 2])
     with cols[0]:
-        if st.button(f"❌ Clear {label}", key=f"clear_{label}"):
+        if st.button("❌", key=f"clear_{label}"):
             st.session_state[label] = None
     with cols[1]:
         suit_choice = st.radio(f"Choose Suit for {label}", list(suits.keys()), horizontal=True, key=f"suit_{label}")
