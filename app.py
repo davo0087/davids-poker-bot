@@ -10,17 +10,20 @@ ranks = ['2', '3', '4', '5', '6', '7', '8', '9', 'T', 'J', 'Q', 'K', 'A']
 st.title("♠️ Poker EV & Odds Dashboard")
 st.write("Click your cards and chips to calculate win odds and expected value.")
 
+# --- Initialize session state for cards ---
+for label in ["Hole 1", "Hole 2", "Flop 1", "Flop 2", "Flop 3", "Turn", "River"]:
+    if label not in st.session_state:
+        st.session_state[label] = None
+
 # --- Interactive Card Pickers ---
 def card_grid(label):
     st.markdown(f"**{label}**")
     suit_choice = st.radio(f"Choose Suit for {label}", list(suits.keys()), horizontal=True, key=f"suit_{label}")
     cols = st.columns(13)
-    card = None
     for i, rank in enumerate(ranks):
         if cols[i].button(rank, key=f"{label}_{rank}"):
-            card = rank + suits[suit_choice]
-            st.session_state[label] = card
-    return st.session_state.get(label, ranks[0] + suits[suit_choice])
+            st.session_state[label] = rank + suits[suit_choice]
+    return st.session_state[label]
 
 hole1 = card_grid("Hole 1")
 hole2 = card_grid("Hole 2")
@@ -38,7 +41,7 @@ river = card_grid("River")
 st.markdown("---")
 st.subheader("\U0001FA99 Pot & Call Chips")
 
-# Initialize session state
+# Initialize session state for chips
 if "pot" not in st.session_state:
     st.session_state.pot = 100.0
 if "call" not in st.session_state:
@@ -68,9 +71,15 @@ with call_col:
             st.session_state.call += val
     st.session_state.call = st.number_input("Call Amount ($):", value=st.session_state.call, step=0.25)
 
+# --- Display Selected Cards ---
+st.markdown("---")
+st.subheader("🃏 Your Current Hand")
+st.write(f"Hole Cards: {st.session_state['Hole 1']} {st.session_state['Hole 2']}")
+st.write(f"Board: {st.session_state['Flop 1']} {st.session_state['Flop 2']} {st.session_state['Flop 3']} {st.session_state['Turn']} {st.session_state['River']}")
+
 # --- Calculations ---
 def parse_cards(card_strs):
-    return [Card.new(c) for c in card_strs]
+    return [Card.new(c) for c in card_strs if c]
 
 def calculate_win_and_tie_odds(hole_strs, board_strs, num_players=2, simulations=1000):
     evaluator = Evaluator()
@@ -116,8 +125,8 @@ def calculate_ev(pot, call_amt, win_pct, tie_pct):
 # --- Run Button ---
 st.markdown("---")
 if st.button("Calculate EV & Odds"):
-    hole = [hole1, hole2]
-    board = [flop1, flop2, flop3, turn, river]
+    hole = [st.session_state['Hole 1'], st.session_state['Hole 2']]
+    board = [st.session_state['Flop 1'], st.session_state['Flop 2'], st.session_state['Flop 3'], st.session_state['Turn'], st.session_state['River']]
     win, tie = calculate_win_and_tie_odds(hole, board)
     if win is not None:
         ev = calculate_ev(st.session_state.pot, st.session_state.call, win, tie)
