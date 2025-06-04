@@ -11,6 +11,25 @@ h1, .stTitle {
 
 .stApp {
     background-color: rgba(0, 0, 0, 0.6);
+    color: white;
     padding: 1rem;
     border-radius: 8px;
 }
+
+button[class^="st-"],
+div[class*="stButton"] > button,
+.element-container button {
+    color: red !important;
+}
+
+img {
+    border: 2px solid white;
+    border-radius: 4px;
+}
+img {
+  background-color: white;
+  padding: 4px;
+  border-radius: 6px;
+}
+
+
