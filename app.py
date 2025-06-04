@@ -45,8 +45,10 @@ for i, rank in enumerate(ranks):
 # --- Show selected cards ---
 st.markdown("---")
 st.subheader("🗃️ Selected Cards")
-st.write(f"My Cards: {st.session_state.my_cards}")
-st.write(f"Table Cards: {st.session_state.table_cards}")
+my_pretty = ' '.join([r[0] + list(suits.keys())[list(suits.values()).index(r[1])] for r in st.session_state.my_cards])
+st.write(f"My Cards: {my_pretty}")
+table_pretty = ' '.join([r[0] + list(suits.keys())[list(suits.values()).index(r[1])] for r in st.session_state.table_cards])
+st.write(f"Table Cards: {table_pretty}")
 
 # --- Utilities ---
 def parse_cards(card_strs):
