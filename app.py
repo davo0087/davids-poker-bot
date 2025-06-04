@@ -17,7 +17,7 @@ st.markdown("""
         background-size: cover;
         color: white;
     }
-    .stMarkdown, .css-10trblm, .css-1v3fvcr, .css-1d391kg, .css-ffhzg2 {
+    .stMarkdown, .css-10trblm, .css-1v3fvcr, .css-1d391kg, .css-ffhzg2, button, div, span, label {
         color: white !important;
     }
     img {
