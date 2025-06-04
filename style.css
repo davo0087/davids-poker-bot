@@ -14,6 +14,14 @@ h1, .stTitle {
     color: white;
     padding: 1rem;
     border-radius: 8px;
+
+    img {
+  background: white;
+  border: 2px solid black;
+  border-radius: 4px;
+  padding: 4px;
+}
+
 }
 
 button[class^="st-"],
