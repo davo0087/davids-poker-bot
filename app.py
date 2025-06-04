@@ -8,14 +8,10 @@ suits = {'♥️': 'h', '♦️': 'd', '♣️': 'c', '♠️': 's'}
 ranks = ['2', '3', '4', '5', '6', '7', '8', '9', 'T', 'J', 'Q', 'K', 'A']
 
 st.title("♠️ Poker Decision Dashboard")
-st.markdown("""
-    <style>
-    .main {
-        background: url('https://cdn.pixabay.com/photo/2016/07/05/18/06/poker-1491536_1280.jpg') no-repeat center center fixed;
-        background-size: cover;
-    }
-    </style>
-    """, unsafe_allow_html=True)
+# Load CSS from style.css file in the repo
+with open("style.css") as f:
+    st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
+
 
 
 if st.button("🔄 Reset All Cards"):
