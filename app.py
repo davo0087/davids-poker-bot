@@ -11,13 +11,20 @@ st.title("♠️ Poker Decision Dashboard")
 st.markdown("""
     <style>
     .stApp {
-        background-color: #35654d; /* Green felt-like color */
+        background-color: #35654d;
         background-image: radial-gradient(circle, #35654d 0%, #234936 100%);
         background-attachment: fixed;
         background-size: cover;
         color: white;
     }
-    </style>
+    .stMarkdown, .css-10trblm, .css-1v3fvcr, .css-1d391kg, .css-ffhzg2 {
+        color: white !important;
+    }
+    img {
+        border: 2px solid black;
+        border-radius: 4px;
+    }
+</style>
     """, unsafe_allow_html=True)
 
 if st.button("🔄 Reset All Cards"):
