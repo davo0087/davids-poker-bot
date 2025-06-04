@@ -18,10 +18,17 @@ st.markdown("""
         color: white;
     }
     .stMarkdown, .css-10trblm, .css-1v3fvcr, .css-1d391kg, .css-ffhzg2, button, div, span, label {
-        color: red !important;
+        color: white !important;
     }
     img {
         border: 2px solid black;
+        border-radius: 4px;
+    }
+button[class^="st-"], div[class*="stButton"] > button, .element-container button {
+        color: red !important;
+    }
+    img {
+        border: 2px solid white;
         border-radius: 4px;
     }
 </style>
