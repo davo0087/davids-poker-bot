@@ -10,14 +10,13 @@ ranks = ['2', '3', '4', '5', '6', '7', '8', '9', 'T', 'J', 'Q', 'K', 'A']
 st.title("♠️ Poker Decision Dashboard")
 st.markdown("""
     <style>
-    .stApp {
-        background-image: url('https://cdn.pixabay.com/photo/2017/01/18/15/20/poker-1991152_1280.jpg');
+    .main {
+        background: url('https://cdn.pixabay.com/photo/2016/07/05/18/06/poker-1491536_1280.jpg') no-repeat center center fixed;
         background-size: cover;
-        background-position: center;
-        background-repeat: no-repeat;
     }
     </style>
     """, unsafe_allow_html=True)
+
 
 if st.button("🔄 Reset All Cards"):
     st.session_state.my_cards = []
