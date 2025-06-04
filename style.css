@@ -1,0 +1,16 @@
+/* style.css */
+
+body {
+    background: url('https://cdn.pixabay.com/photo/2016/07/05/18/06/poker-1491536_1280.jpg') no-repeat center center fixed;
+    background-size: cover;
+}
+
+h1, .stTitle {
+    color: white;
+}
+
+.stApp {
+    background-color: rgba(0, 0, 0, 0.6);
+    padding: 1rem;
+    border-radius: 8px;
+}
