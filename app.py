@@ -8,11 +8,17 @@ suits = {'♥️': 'h', '♦️': 'd', '♣️': 'c', '♠️': 's'}
 ranks = ['2', '3', '4', '5', '6', '7', '8', '9', 'T', 'J', 'Q', 'K', 'A']
 
 st.title("♠️ Poker Decision Dashboard")
-# Load CSS from style.css file in the repo
-with open("style.css") as f:
-    st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
-
-
+st.markdown("""
+    <style>
+    .stApp {
+        background-color: #35654d; /* Green felt-like color */
+        background-image: radial-gradient(circle, #35654d 0%, #234936 100%);
+        background-attachment: fixed;
+        background-size: cover;
+        color: white;
+    }
+    </style>
+    """, unsafe_allow_html=True)
 
 if st.button("🔄 Reset All Cards"):
     st.session_state.my_cards = []
@@ -49,10 +55,27 @@ for i, rank in enumerate(ranks):
 # --- Show selected cards ---
 st.markdown("---")
 st.subheader("🗃️ Selected Cards")
-my_pretty = ' '.join([r[0] + list(suits.keys())[list(suits.values()).index(r[1])] for r in st.session_state.my_cards])
-st.write(f"My Cards: {my_pretty}")
-table_pretty = ' '.join([r[0] + list(suits.keys())[list(suits.values()).index(r[1])] for r in st.session_state.table_cards])
-st.write(f"Table Cards: {table_pretty}")
+
+def card_image(card):
+    suit_map = {'h': 'hearts', 'd': 'diamonds', 'c': 'clubs', 's': 'spades'}
+    rank_map = {'T': '10', 'J': 'jack', 'Q': 'queen', 'K': 'king', 'A': 'ace'}
+    rank = rank_map.get(card[0], card[0])
+    suit = suit_map[card[1]]
+    return f"https://raw.githubusercontent.com/hayeah/playing-cards-assets/master/png/{rank}_of_{suit}.png"
+
+if st.session_state.my_cards:
+    st.write("My Cards:")
+    cols = st.columns(len(st.session_state.my_cards))
+    for i, card in enumerate(st.session_state.my_cards):
+        with cols[i]:
+            st.image(card_image(card), width=80)
+
+if st.session_state.table_cards:
+    st.write("Table Cards:")
+    cols = st.columns(len(st.session_state.table_cards))
+    for i, card in enumerate(st.session_state.table_cards):
+        with cols[i]:
+            st.image(card_image(card), width=80)
 
 # --- Utilities ---
 def parse_cards(card_strs):
